@@ -12,4 +12,15 @@ connection.connect(function(err) {
   if (err) throw err;
 });
 
-module.exports = connection;
+function Query(sql, insert) {
+	return new Promise((resolve, reject) => {
+			connection.query(sql, insert, (err, results) => {
+				if (err) {
+					return reject(err)
+				}
+				resolve(results)
+			})
+	})
+}
+
+module.exports = Query;

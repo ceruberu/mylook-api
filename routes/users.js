@@ -1,11 +1,11 @@
-var express = require('express');
+// import userController from '../controllers/userController';
+
+var express = require("express");
 var router = express.Router();
-var db = require('../db');
+var userController = require('../controllers/userController');
+
 
 /* GET users listing. */
-router.post('/signup', function(req, res, next) {
-  // console.log("SIGNUP", req.body);
-})
-
+router.post("/signup", userController.userSignupPost);
 
 module.exports = router;
