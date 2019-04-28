@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const Query = require("../db");
 const saltRounds = 10;
 
@@ -10,12 +11,12 @@ module.exports = {
         email
       );
 
-      if (result.length == 1) {
+      if (result.length === 1) {
         return true;
       } else {
         return false;
       }
-    } catch(err) {
+    } catch (err) {
       throw err;
     }
   },
@@ -31,11 +32,11 @@ module.exports = {
       } else {
         return false;
       }
-    } catch(err) {
+    } catch (err) {
       throw err;
     }
   },
-  hashPassword: async (password) => {
+  hashPassword: async password => {
     try {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       return hashedPassword;
@@ -43,30 +44,54 @@ module.exports = {
       throw err;
     }
   },
-  createUser: async (email, password, username) => {
-
-    const payload = {
-      email, password, username
-    }
-    
+  comparePassword: async (password, hashedPassword) => {
     try {
-      const newUser = await Query(
-        'INSERT INTO users SET ?',
-        payload
-      );
+      const passwordIsMatch = await bcrypt.compare(password, hashedPassword);
+      return passwordIsMatch;
+    } catch (err) {
+      throw err;
+    }
+  },
+  createUser: async (email, password, username) => {
+    const payload = {
+      email,
+      password,
+      username
+    };
+
+    try {
+      const newUser = await Query("INSERT INTO users SET ?", payload);
       return newUser.insertId;
     } catch (err) {
       throw err;
     }
   },
-  getUser: async (userid) => {
+  getUser: async (type, input) => {
     try {
       const user = await Query(
-        'SELECT * FROM users WHERE userid = ? LIMIT 1',
-        userid
+        `SELECT * FROM users WHERE ${type} = ? LIMIT 1`,
+        input
       );
-      return user;
+      return user[0];
+    } catch (err) {
+      throw err;
+    }
+  },
+  createToken: async (userid, email) => {
+    try {
+      let token = await jwt.sign({ userid, email }, process.env.SECRET_KEY, {
+        expiresIn: "24h"
+      });
+      return token;
     } catch(err) {
+      throw err;
+    }
+  },
+  verifyToken: async token => {
+    try {
+      const decode = await jwt.verify(token, process.env.SECRET_KEY);
+      return decode;
+    } catch (err) {
       throw err;
     }
   }
