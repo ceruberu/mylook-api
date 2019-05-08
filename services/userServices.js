@@ -77,9 +77,9 @@ module.exports = {
       throw err;
     }
   },
-  createToken: async (userid, email) => {
+  createToken: async (user_id, email) => {
     try {
-      let token = await jwt.sign({ userid, email }, process.env.SECRET_KEY, {
+      let token = await jwt.sign({ user_id, email }, process.env.SECRET_KEY, {
         expiresIn: "24h"
       });
       return token;

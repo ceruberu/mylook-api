@@ -4,7 +4,7 @@ module.exports = {
   userMe: async (req, res) => {
     try {
       const decode = await verifyToken(req.cookies.token);
-      const user = await getUser('userid', decode.userid);
+      const user = await getUser('user_id', decode.user_id);
       res.status(200).send(user);
     } catch (err) {
       res.clearCookie('token', {httpOnly: true});
@@ -35,8 +35,8 @@ module.exports = {
       if (!emailUsed && !usernameUsed) {
         const hashedPassword = await hashPassword(password);
         const newUserid = await createUser(email, hashedPassword, username);
-        const newUser = await getUser('userid', newUserid);
-        const newToken = await createToken(newUser.userid, newUser.email);
+        const newUser = await getUser('user_id', newUserid);
+        const newToken = await createToken(newUser.user_id, newUser.email);
         res.cookie('token', newToken, {httpOnly: true});
         res.status(200).send(newUser);
       } else {
