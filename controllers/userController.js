@@ -4,7 +4,7 @@ module.exports = {
   userMe: async (req, res) => {
     try {
       const decode = await verifyToken(req.cookies.token);
-      const user = await getUser('user_id', decode.user_id);
+      const user = await getUser('user_id', decode.user_id, false);
       res.status(200).send(user);
     } catch (err) {
       res.clearCookie('token', {httpOnly: true});
@@ -35,7 +35,7 @@ module.exports = {
       if (!emailUsed && !usernameUsed) {
         const hashedPassword = await hashPassword(password);
         const newUserid = await createUser(email, hashedPassword, username);
-        const newUser = await getUser('user_id', newUserid);
+        const newUser = await getUser('user_id', newUserid, false);
         const newToken = await createToken(newUser.user_id, newUser.email);
         res.cookie('token', newToken, {httpOnly: true});
         res.status(200).send(newUser);
@@ -50,14 +50,17 @@ module.exports = {
     }
   },
   userLoginPost: async (req, res) => {
-    const { email, password } = req.body;
     try {
-      const user = await getUser('email', email);
+      const user = await getUser('email', req.body.email, true);
       if (user) {
-        const checkPassword = await comparePassword(password, user.password);
-        const newToken = await createToken(user.userid, email);
+        const checkPassword = await comparePassword(req.body.password, user.password);
+        const newToken = await createToken(user.user_id, req.body.email);
+
+        // Spread copy without password
+        const { password, ...userWithoutPass } = user; 
+
         res.cookie('token', newToken, {httpOnly: true});
-        res.status(200).send(user);
+        res.status(200).send(userWithoutPass);
       } else {
         // user with request email does not exist
       }

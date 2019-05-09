@@ -1,21 +1,17 @@
 const jwt = require('jsonwebtoken');
-const { getUser } = require('../services/userServices');
+const { getUser, verifyToken } = require('../services/userServices');
 
 async function authMiddleware (req, res, next) {
+  console.log("HEY");
   try { 
-    const token = req.headers.authorization.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, (err, payload) => {
-      if (payload) {
-        const user = await getUser('user_id', payload.user_id)
-        if (user.length == 1) {
-          req.user = user[0];
-        }
-      }
+    const decode = await verifyToken(req.cookies.token);
+    if(decode.user_id) {
+      console.log(decode);
       next();
-    })
+    }
   } catch(err) {
     throw err;
   }
 }
 
-modules.export = authMiddleware;
+module.exports = authMiddleware;

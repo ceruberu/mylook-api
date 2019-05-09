@@ -7,7 +7,7 @@ module.exports = {
   checkEmailInUse: async email => {
     try {
       const result = await Query(
-        "SELECT * from users WHERE email = ? LIMIT 1",
+        "SELECT email from users WHERE email = ? LIMIT 1",
         email
       );
 
@@ -23,7 +23,7 @@ module.exports = {
   checkUsernameInUse: async username => {
     try {
       const result = await Query(
-        "SELECT * from users WHERE username = ? LIMIT 1",
+        "SELECT username from users WHERE username = ? LIMIT 1",
         username
       );
 
@@ -66,10 +66,10 @@ module.exports = {
       throw err;
     }
   },
-  getUser: async (type, input) => {
+  getUser: async (type, input, getPass) => {
     try {
       const user = await Query(
-        `SELECT * FROM users WHERE ${type} = ? LIMIT 1`,
+        `SELECT user_id, ${getPass? 'password,' : ''} email, created_at, gender, email_verified, fb_id, naver_id, google_id, username, profile FROM users WHERE ${type} = ? LIMIT 1`,
         input
       );
       return user[0];
