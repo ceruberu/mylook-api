@@ -5,17 +5,24 @@ const S3 = require('../s3');
 module.exports = {
   createPresignedURL: async () => {
     const uuid = uuidv4();
-    const expiresIn = 600;
+    let now = new Date();
+    now.setMinutes(now.getMinutes() + 5);
+    const expirationTime = new Date(now).toISOString();
 
     const params = {
       Bucket: process.env.S3_BUCKET,
-      Key: uuid,
-      Expires: expiresIn
+      Expiration: expirationTime,
+      Conditions: [
+        ['content-length-range', 0, 10000000] // 10 Mb
+      ],
+      Fields: {
+        key: uuid
+      }
     };
     
     try {
-      const url = await S3.getSignedUrl('putObject', params);
-      return url;
+      const presignedObj = await S3.createPresignedPost(params)
+      return presignedObj;
     } catch(err) {
       throw(err);
     }

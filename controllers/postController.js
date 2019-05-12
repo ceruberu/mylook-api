@@ -4,8 +4,12 @@ const { createPresignedURL } = require('../services/postServices');
 
 module.exports = {
   getPresignedURL: async (req, res) => {
-    const presignedURL = await createPresignedURL();
-    console.log(presignedURL);
+    try {
+      const presignedURL = await createPresignedURL();
+      res.status(200).send(presignedURL);
+    } catch (err) {
+      throw err;
+    }
   },
   submitPhoto: async (req, res) => {
     const { user } = req.body;
